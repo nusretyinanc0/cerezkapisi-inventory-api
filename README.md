@@ -46,12 +46,12 @@ Uygulama, sorumlulukların ayrılması (**Separation of Concerns**) prensibine u
 
 ```mermaid
 flowchart LR
-    Client["İstemci\n(Postman / Web UI)"] -->|HTTP Request| Express["Express.js Sunucu\n(src/app.js)"]
-    Express --> Logger["Logger Middleware\n(src/middlewares/logger.js)"]
+    Client["İstemci (Postman / Web UI)"] -->|HTTP İsteği| Express["Express.js Sunucu (app.js)"]
+    Express --> Logger["Logger Middleware (logger.js)"]
     Logger -->|Log Kaydı| LogFile[("logs/requests.log")]
-    Logger -->|next()| Router["Product Router\n(src/routes/productRoutes.js)"]
-    Router --> Controller["Product Controller\n(src/controllers/productController.js)"]
-    Controller <-->|fs Okuma / Yazma| DB[("JSON Veri Deposu\n(src/data/products.json)")]
+    Logger -->|Sonraki Adım| Router["Product Router (productRoutes.js)"]
+    Router --> Controller["Product Controller (productController.js)"]
+    Controller <-->|fs Okuma ve Yazma| DB[("JSON Veri Deposu (products.json)")]
 ```
 
 ### 📂 Klasör Yapısı
@@ -307,8 +307,6 @@ npm run dev
 ```
 
 Sunucu varsayılan olarak **`http://localhost:3000`** portunda aktif olacaktır:
-- **Görsel Web Yönetim Paneli:** [http://localhost:3000](http://localhost:3000)
-- **REST API Ana Uç Noktası:** [http://localhost:3000/api/products](http://localhost:3000/api/products)
 
 ---
 
