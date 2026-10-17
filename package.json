@@ -1,0 +1,22 @@
+{
+  "name": "kuruyemis-stok-api",
+  "version": "1.0.0",
+  "description": "ÇerezKapısı - Kuruyemiş Dükkanı Envanter ve Stok Yönetim Sistemi REST API",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "expressjs",
+    "rest-api",
+    "inventory",
+    "crud"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

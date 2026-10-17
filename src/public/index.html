@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ÇerezKapısı | Kuruyemiş Envanter ve Stok Yönetim Paneli</title>
+  <style>
+    :root {
+      --bg: #0f1412;
+      --card: #171f1c;
+      --card-hover: #1e2925;
+      --border: #283630;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #13221c 0%, #171f1c 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .api-badge {
+      background: #111815;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: 0 24px;
+    }
+
+    /* Özet Kartları */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Araç Çubuğu */
+    .toolbar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    input, select {
+      background: #0f1412;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .search-input {
+      min-width: 250px;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #06281e;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: var(--card-hover);
+      border-color: var(--muted);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Tablo */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #121816;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    tr:hover td {
+      background: var(--card-hover);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-stokta {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-kritik_stok {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-tukendi {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .category-tag {
+      background: #202b26;
+      color: #d1fae5;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🥜</div>
+      <div>
+        <h1>ÇerezKapısı — Envanter ve Stok Yönetim Paneli</h1>
+        <p>Backend Geliştirme Eğitimi Projesi (REST API + Canlı Yönetim Ekranı)</p>
+      </div>
+    </div>
+    <div class="api-badge">
+      <span class="pulse"></span>
+      <span id="lastApiCall">Son API İsteği: GET /api/products</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Özet İstatistik Kartları -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Toplam Ürün Çeşidi</div>
+        <div class="value" id="totalProducts">0</div>
+        <div class="sub">Envanterdeki aktif kalem sayısı</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Toplam Kuruyemiş Stoğu</div>
+        <div class="value" id="totalStockKg">0 kg</div>
+        <div class="sub">Depo + Tezgah toplam ağırlık</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Kritik Stoktaki Ürünler</div>
+        <div class="value" style="color: #fbbf24;" id="lowStockCount">0</div>
+        <div class="sub">10 kg ve altında kalan ürünler</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Tahmini Envanter Değeri</div>
+        <div class="value" style="color: #34d399;" id="totalValue">0 ₺</div>
+        <div class="sub">Stok (kg) × Birim Fiyat toplamı</div>
+      </div>
+    </div>
+
+    <!-- Arama, Filtreleme ve Yeni Ekleme -->
+    <div class="toolbar">
+      <div class="filters">
+        <input type="text" id="searchInput" class="search-input" placeholder="Ürün veya tedarikçi firma ara..." oninput="renderTable()" />
+        <select id="categoryFilter" onchange="renderTable()">
+          <option value="">Tüm Kategoriler</option>
+          <option value="Kavrulmuş Kuruyemiş">Kavrulmuş Kuruyemiş</option>
+          <option value="Çiğ Kuruyemiş">Çiğ Kuruyemiş</option>
+          <option value="Kabuklu Kuruyemiş">Kabuklu Kuruyemiş</option>
+          <option value="Çekirdek & Leblebi">Çekirdek & Leblebi</option>
+          <option value="Kuru Meyve">Kuru Meyve</option>
+          <option value="Karışık Çerez">Karışık Çerez</option>
+          <option value="Lokum & Şekerleme">Lokum & Şekerleme</option>
+          <option value="Ezme & Kahve">Ezme & Kahve</option>
+        </select>
+        <select id="statusFilter" onchange="renderTable()">
+          <option value="">Tüm Stok Durumları</option>
+          <option value="stokta">Stokta Var</option>
+          <option value="kritik_stok">Kritik Stok (Azalıyor)</option>
+          <option value="tukendi">Tükendi</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Yeni Ürün Ekle (POST)</button>
+    </div>
+
+    <!-- Ürün Tablosu -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ürün Adı</th>
+            <th>Kategori</th>
+            <th>Tedarikçi Firma</th>
+            <th>Kalan Stok</th>
+            <th>Birim Fiyat (1 Kg)</th>
+            <th>Durum</th>
+            <th>İşlemler (CRUD)</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody">
+          <!-- Ürünler JavaScript ile buradan doldurulur -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Ürün Ekleme / Güncelleme Modalı -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <h2 id="modalTitle">Yeni Ürün Ekle</h2>
+      <input type="hidden" id="editProductId" />
+      <div class="form-group">
+        <label>Ürün Adı</label>
+        <input type="text" id="nameInput" placeholder="Örn: Kavrulmuş Antep Fıstığı" />
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select id="categoryInput">
+          <option value="Kavrulmuş Kuruyemiş">Kavrulmuş Kuruyemiş</option>
+          <option value="Çiğ Kuruyemiş">Çiğ Kuruyemiş</option>
+          <option value="Kabuklu Kuruyemiş">Kabuklu Kuruyemiş</option>
+          <option value="Çekirdek & Leblebi">Çekirdek & Leblebi</option>
+          <option value="Kuru Meyve">Kuru Meyve</option>
+          <option value="Karışık Çerez">Karışık Çerez</option>
+          <option value="Lokum & Şekerleme">Lokum & Şekerleme</option>
+          <option value="Ezme & Kahve">Ezme & Kahve</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tedarikçi Firma Adı</label>
+        <input type="text" id="supplierInput" placeholder="Örn: Antep Bereket Gıda Ltd." />
+      </div>
+      <div class="form-group">
+        <label>Stok Miktarı (Kg)</label>
+        <input type="number" step="0.5" id="stockKgInput" placeholder="Örn: 25" />
+      </div>
+      <div class="form-group">
+        <label>1 Kg Satış Fiyatı (₺)</label>
+        <input type="number" step="1" id="pricePerKgInput" placeholder="Örn: 480" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">İptal</button>
+        <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ürün Detay Modalı (GET /api/products/:id) -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <h2>Ürün Detay Kartı (GET /api/products/:id)</h2>
+      <div id="detailContent" style="line-height: 1.9; font-size: 14px; color: #d1d5db;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeDetailModal()">Tamam</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allProducts = [];
+
+    function setApiLog(text) {
+      document.getElementById('lastApiCall').textContent = 'Son API İsteği: ' + text;
+    }
+
+    // 1. GET /api/products — Tüm ürünleri API'den çek
+    async function fetchProducts() {
+      setApiLog('GET /api/products');
+      const res = await fetch('/api/products');
+      const json = await res.json();
+      allProducts = json.data || [];
+      updateStats();
+      renderTable();
+    }
+
+    function updateStats() {
+      document.getElementById('totalProducts').textContent = allProducts.length;
+      const totalKg = allProducts.reduce((sum, p) => sum + Number(p.stockKg || 0), 0);
+      document.getElementById('totalStockKg').textContent = totalKg.toFixed(1) + ' kg';
+
+      const lowCount = allProducts.filter(p => p.status === 'kritik_stok' || p.status === 'tukendi').length;
+      document.getElementById('lowStockCount').textContent = lowCount;
+
+      const totalVal = allProducts.reduce((sum, p) => sum + (Number(p.stockKg || 0) * Number(p.pricePerKg || 0)), 0);
+      document.getElementById('totalValue').textContent = totalVal.toLocaleString('tr-TR') + ' ₺';
+    }
+
+    function formatStatusBadge(status) {
+      if (status === 'stokta') return '<span class="badge badge-stokta">Stokta Var</span>';
+      if (status === 'kritik_stok') return '<span class="badge badge-kritik_stok">Kritik Stok</span>';
+      return '<span class="badge badge-tukendi">Tükendi</span>';
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      const filtered = allProducts.filter(p => {
+        const matchSearch = p.name.toLowerCase().includes(search) || (p.supplier || '').toLowerCase().includes(search);
+        const matchCat = !category || p.category === category;
+        const matchStatus = !status || p.status === status;
+        return matchSearch && matchCat && matchStatus;
+      });
+
+      const tbody = document.getElementById('productTableBody');
+      tbody.innerHTML = filtered.map(p => `
+        <tr>
+          <td><strong>#${p.id}</strong></td>
+          <td><strong>${p.name}</strong></td>
+          <td><span class="category-tag">${p.category}</span></td>
+          <td style="color: #9ca3af;">${p.supplier}</td>
+          <td><strong>${p.stockKg} kg</strong></td>
+          <td><strong>${p.pricePerKg} ₺</strong></td>
+          <td>${formatStatusBadge(p.status)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-sm btn-outline" onclick="viewProductDetail(${p.id})">Detay</button>
+              <button class="btn btn-sm btn-outline" onclick="openEditModal(${p.id})">Düzenle</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Sil</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 2. GET /api/products/:id — Tekil Ürün Detayı
+    async function viewProductDetail(id) {
+      setApiLog(`GET /api/products/${id}`);
+      const res = await fetch(`/api/products/${id}`);
+      const json = await res.json();
+      if (json.success) {
+        const p = json.data;
+        document.getElementById('detailContent').innerHTML = `
+          <p><strong>Ürün ID:</strong> #${p.id}</p>
+          <p><strong>Ürün Adı:</strong> ${p.name}</p>
+          <p><strong>Kategori:</strong> ${p.category}</p>
+          <p><strong>Tedarikçi Firma:</strong> ${p.supplier}</p>
+          <p><strong>Kalan Stok:</strong> ${p.stockKg} kg</p>
+          <p><strong>Birim Fiyat:</strong> ${p.pricePerKg} ₺ / kg</p>
+          <p><strong>Durum:</strong> ${formatStatusBadge(p.status)}</p>
+          <p><strong>Son Güncelleme:</strong> ${new Date(p.updatedAt).toLocaleString('tr-TR')}</p>
+        `;
+        document.getElementById('detailModal').classList.add('active');
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Yeni Ürün Ekle (POST /api/products)';
+      document.getElementById('editProductId').value = '';
+      document.getElementById('nameInput').value = '';
+      document.getElementById('supplierInput').value = '';
+      document.getElementById('stockKgInput').value = '';
+      document.getElementById('pricePerKgInput').value = '';
+      document.getElementById('productModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const p = allProducts.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('modalTitle').textContent = `Ürün Güncelle #${p.id} (PUT /api/products/${p.id})`;
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('nameInput').value = p.name;
+      document.getElementById('categoryInput').value = p.category;
+      document.getElementById('supplierInput').value = p.supplier;
+      document.getElementById('stockKgInput').value = p.stockKg;
+      document.getElementById('pricePerKgInput').value = p.pricePerKg;
+      document.getElementById('productModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('productModal').classList.remove('active');
+    }
+
+    // 3 & 4. POST /api/products ve PUT /api/products/:id
+    async function saveProduct() {
+      const id = document.getElementById('editProductId').value;
+      const payload = {
+        name: document.getElementById('nameInput').value,
+        category: document.getElementById('categoryInput').value,
+        supplier: document.getElementById('supplierInput').value,
+        stockKg: Number(document.getElementById('stockKgInput').value),
+        pricePerKg: Number(document.getElementById('pricePerKgInput').value)
+      };
+
+      if (id) {
+        setApiLog(`PUT /api/products/${id}`);
+        await fetch(`/api/products/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        setApiLog('POST /api/products');
+        await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      closeModal();
+      await fetchProducts();
+    }
+
+    // 5. DELETE /api/products/:id
+    async function deleteProduct(id) {
+      if (!confirm(`#${id} numaralı ürünü silmek istediğinize emin misiniz?`)) return;
+      setApiLog(`DELETE /api/products/${id}`);
+      await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      await fetchProducts();
+    }
+
+    // Sayfa yüklendiğinde ürünleri getir
+    fetchProducts();
+  </script>
+</body>
+</html>
